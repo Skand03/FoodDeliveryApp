@@ -1,0 +1,11 @@
+com\fooddelivery\config\WebConfig.class
+com\fooddelivery\model\User$Role.class
+com\fooddelivery\controller\AuthController.class
+com\fooddelivery\dto\LoginRequest.class
+com\fooddelivery\dto\ApiResponse.class
+com\fooddelivery\FoodDeliveryApplication.class
+com\fooddelivery\repository\UserRepository.class
+com\fooddelivery\dto\RegisterRequest.class
+com\fooddelivery\dto\UserResponse.class
+com\fooddelivery\service\UserService.class
+com\fooddelivery\model\User.class
