@@ -1,60 +1,48 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { restaurantAPI } from '../services/api';
+
 const Restaurants = () => {
-  const restaurants = [
-    {
-      id: 1,
-      name: "Pizza Palace",
-      cuisine: "Italian",
-      rating: 4.5,
-      deliveryTime: "25-35 min",
-      image: "🍕",
-      featured: true
-    },
-    {
-      id: 2,
-      name: "Burger Barn",
-      cuisine: "American",
-      rating: 4.3,
-      deliveryTime: "20-30 min",
-      image: "🍔",
-      featured: false
-    },
-    {
-      id: 3,
-      name: "Sushi Spot",
-      cuisine: "Japanese",
-      rating: 4.7,
-      deliveryTime: "30-40 min",
-      image: "🍣",
-      featured: true
-    },
-    {
-      id: 4,
-      name: "Taco Town",
-      cuisine: "Mexican",
-      rating: 4.2,
-      deliveryTime: "15-25 min",
-      image: "🌮",
-      featured: false
-    },
-    {
-      id: 5,
-      name: "Curry Corner",
-      cuisine: "Indian",
-      rating: 4.6,
-      deliveryTime: "25-35 min",
-      image: "🍛",
-      featured: true
-    },
-    {
-      id: 6,
-      name: "Salad Station",
-      cuisine: "Healthy",
-      rating: 4.4,
-      deliveryTime: "15-20 min",
-      image: "🥗",
-      featured: false
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchRestaurants();
+  }, []);
+
+  const fetchRestaurants = async () => {
+    try {
+      const response = await restaurantAPI.getAll();
+      setRestaurants(response.data.data);
+    } catch (error) {
+      console.error('Error fetching restaurants:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      fetchRestaurants();
+      return;
+    }
+    try {
+      const response = await restaurantAPI.search(searchQuery);
+      setRestaurants(response.data.data);
+    } catch (error) {
+      console.error('Error searching restaurants:', error);
+    }
+  };
+
+  const handleRestaurantClick = (restaurantId) => {
+    navigate(`/restaurant/${restaurantId}`);
+  };
+
+  if (loading) {
+    return <div className="loading">Loading restaurants...</div>;
+  }
 
   return (
     <div className="restaurants-page">
@@ -71,8 +59,11 @@ const Restaurants = () => {
               type="text" 
               placeholder="Search restaurants or cuisines..." 
               className="search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
-            <button className="search-btn">🔍</button>
+            <button className="search-btn" onClick={handleSearch}>🔍</button>
           </div>
           <div className="filters">
             <button className="filter-btn active">All</button>
@@ -87,9 +78,9 @@ const Restaurants = () => {
           <h2>Featured Restaurants</h2>
           <div className="restaurants-grid">
             {restaurants.filter(r => r.featured).map(restaurant => (
-              <div key={restaurant.id} className="restaurant-card featured">
+              <div key={restaurant.id} className="restaurant-card featured" onClick={() => handleRestaurantClick(restaurant.id)}>
                 <div className="restaurant-image">
-                  <span className="restaurant-emoji">{restaurant.image}</span>
+                  <span className="restaurant-emoji">{restaurant.imageUrl}</span>
                   <div className="featured-badge">Featured</div>
                 </div>
                 <div className="restaurant-info">
@@ -99,7 +90,7 @@ const Restaurants = () => {
                     <span className="rating">⭐ {restaurant.rating}</span>
                     <span className="delivery-time">🕒 {restaurant.deliveryTime}</span>
                   </div>
-                  <button className="order-btn">Order Now</button>
+                  <button className="order-btn">View Menu</button>
                 </div>
               </div>
             ))}
@@ -111,9 +102,9 @@ const Restaurants = () => {
           <h2>All Restaurants</h2>
           <div className="restaurants-grid">
             {restaurants.map(restaurant => (
-              <div key={restaurant.id} className="restaurant-card">
+              <div key={restaurant.id} className="restaurant-card" onClick={() => handleRestaurantClick(restaurant.id)}>
                 <div className="restaurant-image">
-                  <span className="restaurant-emoji">{restaurant.image}</span>
+                  <span className="restaurant-emoji">{restaurant.imageUrl}</span>
                 </div>
                 <div className="restaurant-info">
                   <h3>{restaurant.name}</h3>
@@ -122,7 +113,7 @@ const Restaurants = () => {
                     <span className="rating">⭐ {restaurant.rating}</span>
                     <span className="delivery-time">🕒 {restaurant.deliveryTime}</span>
                   </div>
-                  <button className="order-btn">Order Now</button>
+                  <button className="order-btn">View Menu</button>
                 </div>
               </div>
             ))}
