@@ -42,8 +42,12 @@ const Navbar = () => {
         <div className="nav-menu">
           <Link to="/" className="nav-link">Home</Link>
           <Link to="/restaurants" className="nav-link">Restaurants</Link>
-          <Link to="/about" className="nav-link">About</Link>
-          <Link to="/contact" className="nav-link">Contact</Link>
+          {user && (
+            <>
+              <Link to="/cart" className="nav-link">🛒 Cart</Link>
+              <Link to="/orders" className="nav-link">📦 Orders</Link>
+            </>
+          )}
         </div>
 
         {/* User Actions */}
@@ -71,8 +75,12 @@ const Navbar = () => {
       <div className={`mobile-menu ${isMenuOpen ? 'active' : ''}`}>
         <Link to="/" className="mobile-nav-link" onClick={toggleMenu}>Home</Link>
         <Link to="/restaurants" className="mobile-nav-link" onClick={toggleMenu}>Restaurants</Link>
-        <Link to="/about" className="mobile-nav-link" onClick={toggleMenu}>About</Link>
-        <Link to="/contact" className="mobile-nav-link" onClick={toggleMenu}>Contact</Link>
+        {user && (
+          <>
+            <Link to="/cart" className="mobile-nav-link" onClick={toggleMenu}>🛒 Cart</Link>
+            <Link to="/orders" className="mobile-nav-link" onClick={toggleMenu}>📦 Orders</Link>
+          </>
+        )}
         {user ? (
           <>
             <button onClick={handleLogout} className="mobile-nav-link logout-btn">Logout</button>
