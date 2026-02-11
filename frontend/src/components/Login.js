@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
+import { setUserSession } from '../utils/auth';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +9,7 @@ const Login = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -22,17 +24,32 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
       const response = await authAPI.login(formData);
       
       // Check if login was successful
       if (response.data.success) {
-        // Store user data (no token in simplified version)
-        localStorage.setItem('user', JSON.stringify(response.data.data));
+        // Store user data using utility function
+        const userData = response.data.data;
+        console.log('Login successful, storing user data:', userData);
+        setUserSession(userData);
         
-        // Redirect to home page
-        navigate('/');
+        setSuccess('Login successful! Redirecting...');
+        
+        // Redirect based on user role after a short delay
+        setTimeout(() => {
+          if (userData.role === 'VENDOR') {
+            navigate('/vendor-dashboard');
+          } else if (userData.role === 'ADMIN') {
+            navigate('/admin-dashboard');
+          } else if (userData.role === 'CUSTOMER') {
+            navigate('/customer-dashboard');
+          } else {
+            navigate('/');
+          }
+        }, 1000);
       } else {
         setError(response.data.message || 'Login failed');
       }
@@ -50,10 +67,15 @@ const Login = () => {
 
   return (
     <div className="auth-container">
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <h2>Login to Food Delivery</h2>
+      <form className="auth-form login-form" onSubmit={handleSubmit}>
+        <div className="login-header">
+          <div className="login-icon">🎓</div>
+          <h2>Login to Campus Eats</h2>
+          <p>Welcome back to your campus food delivery</p>
+        </div>
         
         {error && <div className="error">{error}</div>}
+        {success && <div className="success">{success}</div>}
         
         <div className="form-group">
           <label htmlFor="email">Email</label>
@@ -81,12 +103,13 @@ const Login = () => {
           />
         </div>
 
-        <button type="submit" className="btn" disabled={loading}>
+        <button type="submit" className="btn login-btn" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
 
         <div className="auth-link">
-          <p>Don't have an account? <Link to="/register">Register here</Link></p>
+          <p>Don't have an account? <Link to="/register">Register as Student</Link></p>
+          <p>Want to sell food? <Link to="/vendor-register">Register as Vendor</Link></p>
         </div>
       </form>
     </div>

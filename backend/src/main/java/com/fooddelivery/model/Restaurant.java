@@ -24,13 +24,20 @@ public class Restaurant {
 
     private String phone;
 
-    private Double rating;
+    private Double rating = 0.0;
 
-    private String deliveryTime;
+    private String deliveryTime = "30-45 mins";
 
-    private String imageUrl;
+    private String imageUrl = "🏪";
 
     private Boolean featured = false;
+
+    private Boolean active = true;
+
+    // Link to the vendor (user who owns this restaurant) - optional for sample data
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vendor_id", nullable = true)
+    private Vendor vendor;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<MenuItem> menuItems = new ArrayList<>();
@@ -67,6 +74,12 @@ public class Restaurant {
 
     public Boolean getFeatured() { return featured; }
     public void setFeatured(Boolean featured) { this.featured = featured; }
+
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
+
+    public Vendor getVendor() { return vendor; }
+    public void setVendor(Vendor vendor) { this.vendor = vendor; }
 
     public List<MenuItem> getMenuItems() { return menuItems; }
     public void setMenuItems(List<MenuItem> menuItems) { this.menuItems = menuItems; }

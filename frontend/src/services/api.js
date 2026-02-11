@@ -12,6 +12,7 @@ const api = axios.create({
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
+  registerVendor: (vendorData) => api.post('/auth/register-vendor', vendorData),
   checkEmail: (email) => api.get(`/auth/check-email?email=${email}`),
   getAllUsers: () => api.get('/auth/users'),
   getUserById: (id) => api.get(`/auth/users/${id}`),
@@ -44,6 +45,20 @@ export const orderAPI = {
   create: (orderData) => api.post('/orders/create', orderData),
   getUserOrders: (userId) => api.get(`/orders/user/${userId}`),
   getById: (orderId) => api.get(`/orders/${orderId}`)
+};
+
+export const vendorAPI = {
+  // Restaurant Management
+  createRestaurant: (restaurantData, userId) => api.post(`/vendor/restaurant?userId=${userId}`, restaurantData),
+  getVendorRestaurant: (userId) => api.get(`/vendor/restaurant/${userId}`),
+  updateRestaurant: (restaurantId, restaurantData, userId) => api.put(`/vendor/restaurant/${restaurantId}?userId=${userId}`, restaurantData),
+  toggleRestaurantStatus: (restaurantId, userId) => api.put(`/vendor/restaurant/${restaurantId}/toggle?userId=${userId}`),
+  
+  // Menu Management
+  addMenuItem: (restaurantId, menuItemData, userId) => api.post(`/vendor/restaurant/${restaurantId}/menu?userId=${userId}`, menuItemData),
+  getMenuItems: (restaurantId, userId) => api.get(`/vendor/restaurant/${restaurantId}/menu?userId=${userId}`),
+  updateMenuItem: (menuItemId, menuItemData, userId) => api.put(`/vendor/menu/${menuItemId}?userId=${userId}`, menuItemData),
+  deleteMenuItem: (menuItemId, userId) => api.delete(`/vendor/menu/${menuItemId}?userId=${userId}`)
 };
 
 export default api;

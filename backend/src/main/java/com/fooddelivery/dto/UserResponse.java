@@ -1,6 +1,9 @@
 package com.fooddelivery.dto;
 
 import com.fooddelivery.model.User;
+import com.fooddelivery.model.Customer;
+import com.fooddelivery.model.Vendor;
+import com.fooddelivery.model.Role;
 
 public class UserResponse {
     private Long id;
@@ -9,7 +12,15 @@ public class UserResponse {
     private String email;
     private String phone;
     private String address;
-    private User.Role role;
+    private Role role;
+    
+    // Additional fields for vendors
+    private String businessName;
+    private String businessLicense;
+    private Boolean isApproved;
+    
+    // Additional fields for customers
+    private Integer loyaltyPoints;
 
     // Default constructor
     public UserResponse() {}
@@ -20,9 +31,38 @@ public class UserResponse {
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.email = user.getEmail();
-        this.phone = user.getPhone();
-        this.address = user.getAddress();
         this.role = user.getRole();
+        // Note: phone and address will be null, should be set separately
+    }
+
+    // Constructor from User and Customer
+    public UserResponse(User user, Customer customer) {
+        this.id = user.getId();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.email = user.getEmail();
+        this.role = user.getRole();
+        if (customer != null) {
+            this.phone = customer.getPhone();
+            this.address = customer.getAddress();
+            this.loyaltyPoints = customer.getLoyaltyPoints();
+        }
+    }
+
+    // Constructor from User and Vendor
+    public UserResponse(User user, Vendor vendor) {
+        this.id = user.getId();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.email = user.getEmail();
+        this.role = user.getRole();
+        if (vendor != null) {
+            this.phone = vendor.getPhone();
+            this.address = vendor.getAddress();
+            this.businessName = vendor.getBusinessName();
+            this.businessLicense = vendor.getBusinessLicense();
+            this.isApproved = vendor.getIsApproved();
+        }
     }
 
     // Getters and Setters
@@ -44,8 +84,20 @@ public class UserResponse {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 
-    public User.Role getRole() { return role; }
-    public void setRole(User.Role role) { this.role = role; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+
+    public String getBusinessName() { return businessName; }
+    public void setBusinessName(String businessName) { this.businessName = businessName; }
+
+    public String getBusinessLicense() { return businessLicense; }
+    public void setBusinessLicense(String businessLicense) { this.businessLicense = businessLicense; }
+
+    public Boolean getIsApproved() { return isApproved; }
+    public void setIsApproved(Boolean isApproved) { this.isApproved = isApproved; }
+
+    public Integer getLoyaltyPoints() { return loyaltyPoints; }
+    public void setLoyaltyPoints(Integer loyaltyPoints) { this.loyaltyPoints = loyaltyPoints; }
 
     @Override
     public String toString() {
