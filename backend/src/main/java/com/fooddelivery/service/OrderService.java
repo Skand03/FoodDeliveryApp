@@ -58,6 +58,7 @@ public class OrderService {
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
         
+        // Clear the cart after successful order creation
         cartItemRepository.deleteByUserId(userId);
         
         return savedOrder;

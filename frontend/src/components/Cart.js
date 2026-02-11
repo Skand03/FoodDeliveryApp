@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cartAPI, orderAPI } from '../services/api';
+import { getUserSession } from '../utils/auth';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -8,36 +9,75 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = getUserSession();
     if (!userData) {
       navigate('/login');
       return;
     }
-    const parsedUser = JSON.parse(userData);
-    setUser(parsedUser);
-    setDeliveryAddress(parsedUser.address);
-    fetchCart(parsedUser.id);
+    
+    console.log('User data from session:', userData);
+    setUser(userData);
+    
+    // Set delivery address from user data (handle both old and new structure)
+    const address = userData.address || userData.deliveryAddress || '';
+    setDeliveryAddress(address);
+    
+    fetchCart(userData.id);
   }, [navigate]);
 
   const fetchCart = async (userId) => {
     try {
+      console.log('Fetching cart for user ID:', userId);
       const response = await cartAPI.getCart(userId);
-      setCartItems(response.data.data);
+      console.log('Cart response:', response);
+      
+      if (response.data && response.data.success) {
+        setCartItems(response.data.data || []);
+      } else {
+        console.log('Cart fetch failed, checking for mock cart data');
+        loadMockCartData();
+      }
     } catch (error) {
       console.error('Error fetching cart:', error);
+      
+      if (error.response?.status === 404) {
+        console.log('Cart not found - checking for mock cart data');
+        loadMockCartData();
+      } else {
+        setCartItems([]);
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const loadMockCartData = () => {
+    try {
+      const mockCartItems = JSON.parse(localStorage.getItem('mockCart') || '[]');
+      console.log('Loaded mock cart items:', mockCartItems);
+      setCartItems(mockCartItems);
+    } catch (error) {
+      console.error('Error loading mock cart data:', error);
+      setCartItems([]);
+    }
+  };
+
   const updateQuantity = async (cartItemId, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeItem(cartItemId);
+      return;
+    }
+
     try {
       await cartAPI.updateItem(cartItemId, newQuantity);
       fetchCart(user.id);
     } catch (error) {
       console.error('Error updating quantity:', error);
+      showMessage('Failed to update quantity', 'error');
     }
   };
 
@@ -47,39 +87,62 @@ const Cart = () => {
       fetchCart(user.id);
     } catch (error) {
       console.error('Error removing item:', error);
+      showMessage('Failed to remove item', 'error');
     }
   };
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
-      return total + (item.menuItem.price * item.quantity);
+      const price = item.menuItem?.price || item.price || 0;
+      const quantity = item.quantity || 1;
+      return total + (price * quantity);
     }, 0);
+  };
+
+  const showMessage = (text, type = 'info') => {
+    setMessage(text);
+    setMessageType(type);
+    setTimeout(() => {
+      setMessage('');
+      setMessageType('');
+    }, 3000);
   };
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
-      alert('Your cart is empty');
+      showMessage('Your cart is empty', 'error');
       return;
     }
 
     if (!deliveryAddress.trim()) {
-      alert('Please enter a delivery address');
+      showMessage('Please enter a delivery address', 'error');
       return;
     }
 
     try {
-      const restaurantId = cartItems[0].restaurant.id;
-      await orderAPI.create({
+      const restaurantId = cartItems[0].restaurant?.id || cartItems[0].menuItem?.restaurantId;
+      console.log('Creating order:', {
+        userId: user.id,
+        restaurantId: restaurantId,
+        deliveryAddress: deliveryAddress
+      });
+
+      const response = await orderAPI.create({
         userId: user.id,
         restaurantId: restaurantId,
         deliveryAddress: deliveryAddress
       });
       
-      alert('Order placed successfully!');
-      navigate('/orders');
+      console.log('Order response:', response);
+      showMessage('Order placed successfully!', 'success');
+      
+      // Clear cart and redirect
+      setCartItems([]);
+      localStorage.removeItem('mockCart');
+      setTimeout(() => navigate('/customer-dashboard'), 2000);
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Failed to place order');
+      showMessage('Failed to place order. Please try again.', 'error');
     }
   };
 
@@ -94,6 +157,14 @@ const Cart = () => {
 
   return (
     <div className="cart-page">
+      {/* Message Notification */}
+      {message && (
+        <div className={`page-message ${messageType}`}>
+          <span>{message}</span>
+          <button onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
+      
       <div className="container">
         <h1>Your Cart</h1>
         
@@ -112,9 +183,9 @@ const Cart = () => {
               {cartItems.map(item => (
                 <div key={item.id} className="cart-item">
                   <div className="item-info">
-                    <h3>{item.menuItem.name}</h3>
-                    <p className="item-restaurant">{item.restaurant.name}</p>
-                    <p className="item-price">${item.menuItem.price.toFixed(2)}</p>
+                    <h3>{item.menuItem?.name || item.name}</h3>
+                    <p className="item-restaurant">{item.restaurant?.name || item.restaurantName}</p>
+                    <p className="item-price">${(item.menuItem?.price || item.price || 0).toFixed(2)}</p>
                   </div>
                   <div className="item-controls">
                     <div className="quantity-controls">
@@ -140,7 +211,7 @@ const Cart = () => {
                     </button>
                   </div>
                   <div className="item-total">
-                    ${(item.menuItem.price * item.quantity).toFixed(2)}
+                    ${((item.menuItem?.price || item.price || 0) * item.quantity).toFixed(2)}
                   </div>
                 </div>
               ))}

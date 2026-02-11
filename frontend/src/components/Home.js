@@ -1,19 +1,22 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { getUserSession } from '../utils/auth';
 
 const Home = () => {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = getUserSession();
     if (userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-      }
+      setUser(userData);
     }
   }, []);
+
+  const handleCategoryClick = (category) => {
+    // Navigate to restaurants page with category filter
+    navigate('/restaurants', { state: { filterType: category } });
+  };
 
   return (
     <div className="home">
@@ -22,8 +25,8 @@ const Home = () => {
         <section className="welcome-section">
           <div className="container">
             <div className="welcome-message">
-              <h2>Welcome back, {user.firstName}! 👋</h2>
-              <p>Ready to order some delicious food?</p>
+              <h2>Welcome back, {user.firstName}! 🎓</h2>
+              <p>Ready to order some delicious campus food?</p>
             </div>
           </div>
         </section>
@@ -34,10 +37,10 @@ const Home = () => {
         <div className="hero-content">
           <div className="hero-text">
             <h1 className="hero-title">
-              Delicious Food <span className="highlight">Delivered Fast</span>
+              Campus Food <span className="highlight">Delivered Fresh</span>
             </h1>
             <p className="hero-subtitle">
-              Order from your favorite restaurants and get fresh, hot meals delivered to your doorstep in minutes.
+              Order from your favorite campus restaurants, department canteens, and food stalls. Get fresh, hot meals delivered right to your dorm or department!
             </p>
             <div className="hero-buttons">
               <Link to="/restaurants" className="btn btn-primary btn-large">
@@ -45,7 +48,7 @@ const Home = () => {
               </Link>
               {!user && (
                 <Link to="/register" className="btn btn-outline btn-large">
-                  Sign Up Free
+                  Join Campus Food
                 </Link>
               )}
             </div>
@@ -54,8 +57,8 @@ const Home = () => {
             <div className="food-illustration">
               <span className="food-emoji">🍔</span>
               <span className="food-emoji">🍕</span>
-              <span className="food-emoji">🍜</span>
-              <span className="food-emoji">🥗</span>
+              <span className="food-emoji">☕</span>
+              <span className="food-emoji">🥪</span>
             </div>
           </div>
         </div>
@@ -64,27 +67,27 @@ const Home = () => {
       {/* Features Section */}
       <section className="features">
         <div className="container">
-          <h2 className="section-title">Why Choose FoodieExpress?</h2>
+          <h2 className="section-title">Why Choose Campus Eats?</h2>
           <div className="features-grid">
             <div className="feature-card">
+              <div className="feature-icon">🎓</div>
+              <h3>Campus Exclusive</h3>
+              <p>Only for students, faculty, and staff members</p>
+            </div>
+            <div className="feature-card">
               <div className="feature-icon">⚡</div>
-              <h3>Fast Delivery</h3>
-              <p>Get your food delivered in 30 minutes or less</p>
+              <h3>Quick Delivery</h3>
+              <p>Fast delivery across all departments and dorms</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🍽️</div>
-              <h3>Quality Food</h3>
-              <p>Fresh ingredients from top-rated restaurants</p>
+              <div className="feature-icon">💰</div>
+              <h3>Student Friendly</h3>
+              <p>Affordable prices with student discounts</p>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">📱</div>
-              <h3>Easy Ordering</h3>
-              <p>Simple and intuitive ordering process</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">💳</div>
-              <h3>Secure Payment</h3>
-              <p>Safe and secure payment options</p>
+              <div className="feature-icon">🏢</div>
+              <h3>Department Canteens</h3>
+              <p>Order from all department canteens and cafeterias</p>
             </div>
           </div>
         </div>
@@ -93,31 +96,49 @@ const Home = () => {
       {/* Popular Categories */}
       <section className="categories">
         <div className="container">
-          <h2 className="section-title">Popular Categories</h2>
+          <h2 className="section-title">Popular Campus Food</h2>
           <div className="categories-grid">
-            <div className="category-card">
-              <div className="category-icon">🍕</div>
-              <h3>Pizza</h3>
+            <div className="category-card" onClick={() => handleCategoryClick('Coffee Shops')}>
+              <div className="category-icon">☕</div>
+              <h3>Coffee & Snacks</h3>
             </div>
-            <div className="category-card">
-              <div className="category-icon">🍔</div>
-              <h3>Burgers</h3>
+            <div className="category-card" onClick={() => handleCategoryClick('Canteens')}>
+              <div className="category-icon">🍽️</div>
+              <h3>Meals</h3>
             </div>
-            <div className="category-card">
+            <div className="category-card" onClick={() => handleCategoryClick('Food Stalls')}>
+              <div className="category-icon">🥪</div>
+              <h3>Quick Bites</h3>
+            </div>
+            <div className="category-card" onClick={() => handleCategoryClick('All')}>
               <div className="category-icon">🍜</div>
-              <h3>Asian</h3>
+              <h3>Department Specials</h3>
             </div>
-            <div className="category-card">
-              <div className="category-icon">🥗</div>
-              <h3>Healthy</h3>
+            <div className="category-card" onClick={() => handleCategoryClick('Coffee Shops')}>
+              <div className="category-icon">🧃</div>
+              <h3>Beverages</h3>
             </div>
-            <div className="category-card">
-              <div className="category-icon">🌮</div>
-              <h3>Mexican</h3>
-            </div>
-            <div className="category-card">
+            <div className="category-card" onClick={() => handleCategoryClick('All')}>
               <div className="category-icon">🍰</div>
               <h3>Desserts</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Vendor CTA Section */}
+      <section className="vendor-cta">
+        <div className="container">
+          <div className="vendor-cta-content">
+            <div className="vendor-text">
+              <h2>Own a Campus Food Business?</h2>
+              <p>Join our platform and reach thousands of hungry students and faculty members!</p>
+              <Link to="/vendor-register" className="btn btn-secondary btn-large">
+                Become a Vendor
+              </Link>
+            </div>
+            <div className="vendor-icon">
+              <span className="vendor-emoji">🏪</span>
             </div>
           </div>
         </div>
@@ -130,15 +151,15 @@ const Home = () => {
             {user ? (
               <>
                 <h2>Hungry? Let's Order!</h2>
-                <p>Browse our amazing restaurant partners and get your favorite food delivered!</p>
+                <p>Browse our amazing campus restaurant partners and get your favorite food delivered!</p>
                 <Link to="/restaurants" className="btn btn-primary btn-large">
-                  Browse Restaurants
+                  Browse Campus Restaurants
                 </Link>
               </>
             ) : (
               <>
                 <h2>Ready to Order?</h2>
-                <p>Join thousands of satisfied customers and get your favorite food delivered today!</p>
+                <p>Join thousands of satisfied students and faculty members. Get your favorite campus food delivered today!</p>
                 <Link to="/register" className="btn btn-primary btn-large">
                   Get Started Now
                 </Link>

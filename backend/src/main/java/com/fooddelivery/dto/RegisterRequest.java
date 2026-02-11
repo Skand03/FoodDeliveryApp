@@ -30,6 +30,10 @@ public class RegisterRequest {
     @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
     private String password;
 
+    // Optional fields for vendor registration
+    private String businessName;
+    private String businessLicense;
+
     // Default constructor
     public RegisterRequest() {}
 
@@ -51,6 +55,12 @@ public class RegisterRequest {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getBusinessName() { return businessName; }
+    public void setBusinessName(String businessName) { this.businessName = businessName; }
+
+    public String getBusinessLicense() { return businessLicense; }
+    public void setBusinessLicense(String businessLicense) { this.businessLicense = businessLicense; }
 
     @Override
     public String toString() {
